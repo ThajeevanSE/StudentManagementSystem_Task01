@@ -10,8 +10,8 @@ public class testController {
     @GetMapping("/firebase-test")
     public String testFirebase() {
         try {
-            // Get default FirebaseApp instance
-            String appName = FirebaseApp.getInstance().getName(); // <-- corrected
+
+            String appName = FirebaseApp.getInstance().getName();
             return "Firebase is connected! App name: " + appName;
         } catch (Exception e) {
             e.printStackTrace();
