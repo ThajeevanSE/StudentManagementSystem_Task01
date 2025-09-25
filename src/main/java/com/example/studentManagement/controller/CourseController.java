@@ -25,10 +25,14 @@ public class CourseController {
         return courseService.getCourseById(id);
     }
 
-    @GetMapping("/all")
-    public List<Course> getAllCourses() throws ExecutionException, InterruptedException {
-        return courseService.getAllCourses();
+    @GetMapping
+    public List<Course> getCourses(
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String lastDocId
+    ) throws ExecutionException, InterruptedException {
+        return courseService.getCoursesPaginated(pageSize, lastDocId);
     }
+
 
     @PutMapping
     public String updateCourse(@RequestBody Course course) throws ExecutionException, InterruptedException {

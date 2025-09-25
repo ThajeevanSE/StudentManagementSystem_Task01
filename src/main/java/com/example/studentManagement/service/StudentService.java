@@ -17,9 +17,10 @@ public class StudentService {
 
     public String addStudent(Student student) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document(student.getId());
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document();
+        student.setId(docRef.getId());
         ApiFuture<WriteResult> future = docRef.set(student);
-        return future.get().getUpdateTime().toString();
+        return "Created student with ID: " + student.getId() + " at " + future.get().getUpdateTime();
     }
 
     public Student getStudentById(String id) throws ExecutionException, InterruptedException {
@@ -29,15 +30,26 @@ public class StudentService {
         return snapshot.exists() ? snapshot.toObject(Student.class) : null;
     }
 
-    public List<Student> getAllStudents() throws ExecutionException, InterruptedException {
+    public List<Student> getStudentsPaginated(int pageSize, String lastDocId) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
+        CollectionReference collection = db.collection(COLLECTION_NAME);
+        Query query = collection.limit(pageSize);
+
+        if (lastDocId != null && !lastDocId.isEmpty()) {
+            DocumentSnapshot lastDoc = collection.document(lastDocId).get().get();
+            if (lastDoc.exists()) {
+                query = query.startAfter(lastDoc);
+            }
+        }
+
+        ApiFuture<QuerySnapshot> future = query.get();
         List<Student> students = new ArrayList<>();
-        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
         for (DocumentSnapshot doc : future.get().getDocuments()) {
             students.add(doc.toObject(Student.class));
         }
         return students;
     }
+
 
     public String updateStudent(Student student) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();

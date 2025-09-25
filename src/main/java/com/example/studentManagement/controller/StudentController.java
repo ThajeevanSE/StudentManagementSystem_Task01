@@ -25,9 +25,12 @@ public class StudentController {
         return studentService.getStudentById(id);
     }
 
-    @GetMapping("/all")
-    public List<Student> getAllStudents() throws ExecutionException, InterruptedException {
-        return studentService.getAllStudents();
+    @GetMapping
+    public List<Student> getStudents(
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String lastDocId
+    ) throws ExecutionException, InterruptedException {
+        return studentService.getStudentsPaginated(pageSize, lastDocId);
     }
 
     @PutMapping

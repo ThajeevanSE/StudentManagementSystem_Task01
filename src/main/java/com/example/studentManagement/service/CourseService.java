@@ -42,16 +42,26 @@ public class CourseService {
         }
     }
 
-    public List<Course> getAllCourses() throws ExecutionException, InterruptedException {
+    public List<Course> getCoursesPaginated(int pageSize, String lastDocId) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
-        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
-        List<Course> courseList = new ArrayList<>();
+        CollectionReference collection = db.collection(COLLECTION_NAME);
+        Query query = collection.limit(pageSize);
 
-        for (DocumentSnapshot doc : future.get().getDocuments()) {
-            courseList.add(doc.toObject(Course.class));
+        if (lastDocId != null && !lastDocId.isEmpty()) {
+            DocumentSnapshot lastDoc = collection.document(lastDocId).get().get();
+            if (lastDoc.exists()) {
+                query = query.startAfter(lastDoc);
+            }
         }
-        return courseList;
+
+        ApiFuture<QuerySnapshot> future = query.get();
+        List<Course> courses = new ArrayList<>();
+        for (DocumentSnapshot doc : future.get().getDocuments()) {
+            courses.add(doc.toObject(Course.class));
+        }
+        return courses;
     }
+
 
     public String updateCourse(Course course) throws ExecutionException, InterruptedException {
         if (course.getId() == null || course.getId().isEmpty()) {
@@ -60,10 +70,11 @@ public class CourseService {
 
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(course.getId());
-        ApiFuture<WriteResult> future = docRef.set(course);
 
+        ApiFuture<WriteResult> future = docRef.set(course, SetOptions.merge()); // merge updates
         return "Course updated at: " + future.get().getUpdateTime();
     }
+
 
     public String deleteCourse(String id) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
