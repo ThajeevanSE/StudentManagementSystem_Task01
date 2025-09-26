@@ -3,44 +3,56 @@ package com.example.studentManagement.controller;
 import com.example.studentManagement.model.Course;
 import com.example.studentManagement.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-@RestController
-@RequestMapping("/course")
+@Controller
+@RequestMapping("/courses")
 public class CourseController {
 
     @Autowired
     private CourseService courseService;
 
-    @PostMapping
-    public String addCourse(@RequestBody Course course) throws ExecutionException, InterruptedException {
-        return courseService.addCourse(course);
-    }
-
-    @GetMapping("/{id}")
-    public Course getCourseById(@PathVariable String id) throws ExecutionException, InterruptedException {
-        return courseService.getCourseById(id);
-    }
-
     @GetMapping
-    public List<Course> getCourses(
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String lastDocId
-    ) throws ExecutionException, InterruptedException {
-        return courseService.getCoursesPaginated(pageSize, lastDocId);
+    public String listCourses(Model model) throws ExecutionException, InterruptedException {
+        List<Course> courses = courseService.getCoursesPaginated(50, null);
+        model.addAttribute("courses", courses);
+        return "courses/list";
     }
 
-
-    @PutMapping
-    public String updateCourse(@RequestBody Course course) throws ExecutionException, InterruptedException {
-        return courseService.updateCourse(course);
+    @GetMapping("/add")
+    public String showAddForm(Model model) {
+        model.addAttribute("course", new Course());
+        return "courses/add";
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/add")
+    public String addCourse(@ModelAttribute Course course) throws ExecutionException, InterruptedException {
+        courseService.addCourse(course);
+        return "redirect:/courses";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable String id, Model model) throws ExecutionException, InterruptedException {
+        Course course = courseService.getCourseById(id);
+        model.addAttribute("course", course);
+        return "courses/edit";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updateCourse(@PathVariable String id, @ModelAttribute Course course) throws ExecutionException, InterruptedException {
+        course.setId(id);
+        courseService.updateCourse(course);
+        return "redirect:/courses";
+    }
+
+    @GetMapping("/delete/{id}")
     public String deleteCourse(@PathVariable String id) throws ExecutionException, InterruptedException {
-        return courseService.deleteCourse(id);
+        courseService.deleteCourse(id);
+        return "redirect:/courses";
     }
 }

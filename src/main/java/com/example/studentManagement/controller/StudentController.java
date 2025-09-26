@@ -3,43 +3,56 @@ package com.example.studentManagement.controller;
 import com.example.studentManagement.model.Student;
 import com.example.studentManagement.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-@RestController
-@RequestMapping("/student")
+@Controller
+@RequestMapping("/students")
 public class StudentController {
 
     @Autowired
     private StudentService studentService;
 
-    @PostMapping
-    public String addStudent(@RequestBody Student student) throws ExecutionException, InterruptedException {
-        return studentService.addStudent(student);
-    }
-
-    @GetMapping("/{id}")
-    public Student getStudent(@PathVariable String id) throws ExecutionException, InterruptedException {
-        return studentService.getStudentById(id);
-    }
-
     @GetMapping
-    public List<Student> getStudents(
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String lastDocId
-    ) throws ExecutionException, InterruptedException {
-        return studentService.getStudentsPaginated(pageSize, lastDocId);
+    public String listStudents(Model model) throws ExecutionException, InterruptedException {
+        List<Student> students = studentService.getStudentsPaginated(50, null);
+        model.addAttribute("students", students);
+        return "students/list";
     }
 
-    @PutMapping
-    public String updateStudent(@RequestBody Student student) throws ExecutionException, InterruptedException {
-        return studentService.updateStudent(student);
+    @GetMapping("/add")
+    public String showAddForm(Model model) {
+        model.addAttribute("student", new Student());
+        return "students/add";
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/add")
+    public String addStudent(@ModelAttribute Student student) throws ExecutionException, InterruptedException {
+        studentService.addStudent(student);
+        return "redirect:/students";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable String id, Model model) throws ExecutionException, InterruptedException {
+        Student student = studentService.getStudentById(id);
+        model.addAttribute("student", student);
+        return "students/edit";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updateStudent(@PathVariable String id, @ModelAttribute Student student) throws ExecutionException, InterruptedException {
+        student.setId(id);
+        studentService.updateStudent(student);
+        return "redirect:/students";
+    }
+
+    @GetMapping("/delete/{id}")
     public String deleteStudent(@PathVariable String id) throws ExecutionException, InterruptedException {
-        return studentService.deleteStudent(id);
+        studentService.deleteStudent(id);
+        return "redirect:/students";
     }
 }
