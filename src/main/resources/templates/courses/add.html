@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>Add Course</title></head>
+<head><title>Add Course</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
 <body>
 <h2>Add Course</h2>
 <form th:action="@{/courses/add}" th:object="${course}" method="post">
