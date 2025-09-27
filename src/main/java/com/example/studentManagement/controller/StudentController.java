@@ -21,7 +21,7 @@ public class StudentController {
     public String listStudents(Model model) throws ExecutionException, InterruptedException {
         List<Student> students = studentService.getStudentsPaginated(50, null);
         model.addAttribute("students", students);
-        return "students/list";
+        return "students/list";  // Thymeleaf template
     }
 
     @GetMapping("/add")

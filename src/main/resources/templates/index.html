@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Student Management</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" />
 </head>
-<body>
+<body sec:authorize="isAuthenticated()">
 <h1>Welcome to Student Management System</h1>
 <ul>
     <li><a th:href="@{/students}">Manage Students</a></li>
