@@ -7,6 +7,7 @@ It supports student and course management with CRUD operations.
 ## Features
 - Student APIs: Create, Read, Update, Delete
 - Course APIs: Create, Read, Update, Delete
+- firebase authentication
 - simple testing frontend for testing the funcinalities
 - Firebase Firestore as NoSQL database
 - Proper error handling
